@@ -1,0 +1,36 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "name": "Name",
+                    "host": "Host",
+                    "port": "Port",
+                    "ssl": "Enable SSL",
+                    "verify_ssl": "Verify SSL",
+                    "username": "Username",
+                    "password": "Password",
+                    "scan_interval": "Scan Interval(Seconds)"
+                },
+                "title": "Traccar"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "name": "Name",
+                    "host": "Host",
+                    "port": "Port",
+                    "ssl": "Enable SSL",
+                    "verify_ssl": "Verify SSL",
+                    "username": "Username",
+                    "password": "Password",
+                    "scan_interval": "Scan Interval(Seconds)"
+                },
+                "title": "Traccar"
+            }
+        }
+    }
+}

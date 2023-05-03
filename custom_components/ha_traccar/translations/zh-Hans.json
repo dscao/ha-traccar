@@ -1,0 +1,36 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "name": "名称",
+                    "host": "主机",
+                    "port": "端口",
+                    "ssl": "启用SSL(https)",
+                    "verify_ssl": "校验SSL证书",
+                    "username": "用户名",
+                    "password": "密码",
+                    "scan_interval": "扫描间隔(秒)"
+                },
+                "title": "Traccar"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "name": "名称",
+                    "host": "主机",
+                    "port": "端口",
+                    "ssl": "启用SSL(https)",
+                    "verify_ssl": "校验SSL证书",
+                    "username": "用户名",
+                    "password": "密码",
+                    "scan_interval": "扫描间隔(秒)"
+                },
+                "title": "Traccar"
+            }
+        }
+    }
+}

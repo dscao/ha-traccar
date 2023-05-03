@@ -1,0 +1,7 @@
+{
+  "name": "Traccar",
+  "homeassistant": "0.115.0",
+  "country": "CN",
+  "domains": ["device_tracker"],
+  "render_readme": true
+}
