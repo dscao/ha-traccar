@@ -88,7 +88,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_NAME, default=self.config.get(CONF_NAME)): cv.string,
                         vol.Required(CONF_HOST, default=self.config.get(CONF_HOST)): cv.string,
                         vol.Required(CONF_PORT, default=self.config.get(CONF_PORT)): vol.Coerce(int),
-                        vol.Required(CONF_VERIFY_SSL, default=self.config.get(CONF_VERIFY_SSL)): cv.boolean,
+                        vol.Required(CONF_SSL, default=self.config.get(CONF_SSL)): cv.boolean,
                         vol.Required(CONF_VERIFY_SSL, default=self.config.get(CONF_VERIFY_SSL)): cv.boolean,
                         vol.Required(CONF_USERNAME, default=self.config.get(CONF_USERNAME)): cv.string,
                         vol.Required(CONF_PASSWORD): cv.string,
