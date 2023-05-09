@@ -16,9 +16,18 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL
 )
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_SENSORS, KEY_ARMED, KEY_BATTERY_LEVEL, KEY_BATTERY, KEY_CHARGE, KEY_IGNITION, KEY_MOTION
 
 _LOGGER = logging.getLogger(__name__)
+
+SENSOR_LIST = {
+    KEY_BATTERY_LEVEL: "Battery Level",
+    KEY_BATTERY: "Battery",
+    KEY_ARMED: "Armed",
+    KEY_MOTION: "Motion",
+    KEY_IGNITION: "Ignition",
+    KEY_CHARGE: "Charge"
+}
 
 
 class TraccarFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -49,11 +58,11 @@ class TraccarFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Required(CONF_USERNAME): cv.string,
                         vol.Required(CONF_PASSWORD): cv.string,
                         vol.Required(CONF_SCAN_INTERVAL, default=5): vol.Coerce(int),
+                        vol.Optional(CONF_SENSORS, default=list(SENSOR_LIST.keys())): cv.multi_select(SENSOR_LIST),
                     }
             ),
             errors=errors,
         )
-
 
     @staticmethod
     @callback
@@ -91,8 +100,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_SSL, default=self.config.get(CONF_SSL)): cv.boolean,
                         vol.Required(CONF_VERIFY_SSL, default=self.config.get(CONF_VERIFY_SSL)): cv.boolean,
                         vol.Required(CONF_USERNAME, default=self.config.get(CONF_USERNAME)): cv.string,
-                        vol.Required(CONF_PASSWORD): cv.string,
+                        vol.Required(CONF_PASSWORD, default=self.config.get(CONF_PASSWORD)): cv.string,
                         vol.Required(CONF_SCAN_INTERVAL, default=self.config.get(CONF_SCAN_INTERVAL)): vol.Coerce(int),
+                        vol.Optional(CONF_SENSORS, default=self.config.get(CONF_SENSORS)): cv.multi_select(SENSOR_LIST),
                     }
             ),
             errors=errors,

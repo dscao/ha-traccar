@@ -10,7 +10,8 @@
                     "verify_ssl": "校验SSL证书",
                     "username": "用户名",
                     "password": "密码",
-                    "scan_interval": "扫描间隔(秒)"
+                    "scan_interval": "扫描间隔(秒)",
+                    "sensors": "传感器"
                 },
                 "title": "Traccar"
             }
@@ -27,7 +28,8 @@
                     "verify_ssl": "校验SSL证书",
                     "username": "用户名",
                     "password": "密码",
-                    "scan_interval": "扫描间隔(秒)"
+                    "scan_interval": "扫描间隔(秒)",
+                    "sensors": "传感器"
                 },
                 "title": "Traccar"
             }

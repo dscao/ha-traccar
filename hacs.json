@@ -2,6 +2,6 @@
   "name": "Traccar",
   "homeassistant": "0.115.0",
   "country": "CN",
-  "domains": ["device_tracker"],
+  "domains": ["device_tracker", "sensor", "binary_sensor"],
   "render_readme": true
 }

@@ -10,22 +10,26 @@ from homeassistant.components.device_tracker import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import device_registry
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
     DOMAIN,
     TRACKER_UPDATE,
+    DEVICE_TRACKERS,
     ATTR_ACCURACY,
     ATTR_ALTITUDE,
-    ATTR_BATTERY,
+    ATTR_BATTERY_LEVEL,
     ATTR_BEARING,
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
-    ATTR_SPEED
+    ATTR_SPEED,
+    ATTR_VERSION_HW,
+    ATTR_VERSION_FW
 )
+
+from . import TraccarEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,52 +42,36 @@ async def async_setup_entry(
     @callback
     def _receive_data(server, device, position):
         """Receive set location."""
-        if device.unique_id in hass.data[DOMAIN][entry.entry_id]["devices"]:
+        if device.unique_id in hass.data[DOMAIN][entry.entry_id][DEVICE_TRACKERS]:
             return
 
-        hass.data[DOMAIN][entry.entry_id]["devices"].add(device.unique_id)
+        hass.data[DOMAIN][entry.entry_id][DEVICE_TRACKERS].add(
+            device.unique_id)
 
         async_add_entities(
-            [TraccarEntity(server,device, position)]
+            [TraccarDeviceTrackerEntity(server, device, position)]
         )
 
     async_dispatcher_connect(hass, TRACKER_UPDATE, _receive_data)
 
-    # Restore previously loaded devices
-    dev_reg = device_registry.async_get(hass)
-    dev_ids = {
-        identifier[1]
-        for device in dev_reg.devices.values()
-        for identifier in device.identifiers
-        if identifier[0] == DOMAIN
-    }
-    if not dev_ids:
-        return
 
-    entities = []
-    for dev_id in dev_ids:
-        hass.data[DOMAIN]["devices"].add(dev_id)
-        entity = TraccarEntity(dev_id, None, None, None, None, None)
-        entities.append(entity)
-
-    async_add_entities(entities)
-
-
-class TraccarEntity(TrackerEntity, RestoreEntity):
+class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
     """Represent a tracked device."""
 
     def __init__(self, server, device, position):
         """Set up Geofency entity."""
-        self._accuracy = position.accuracy or 0.0
+        super().__init__(server, device)
         self._attributes = {}
+        self._unique_id = f"{server}-{device.unique_id}-device_tracker"
+        self._update_traccar_info(device, position)
+
+    def _update_traccar_info(self, device, position):
         self._name = device.name
-        self._battery = position.attributes.get("batteryLevel", -1)
         self._latitude = position.latitude
         self._longitude = position.longitude
-        self._unsub_dispatcher = None
-        self._unique_id = f"{server}-{device.unique_id}"
-        self._server = server
-        self._device_unique_id = device.unique_id
+        self._battery = position.attributes.get(ATTR_BATTERY_LEVEL, -1)
+        self._accuracy = position.accuracy or 0.0
+        self._attributes.update(position.attributes)
 
     @property
     def battery_level(self):
@@ -123,7 +111,13 @@ class TraccarEntity(TrackerEntity, RestoreEntity):
     @property
     def device_info(self):
         """Return the device info."""
-        return {"name": self._name, "identifiers": {(DOMAIN, self._unique_id)}}
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._device_info_id)},
+            name=self._name,
+            manufacturer="Traccar",
+            hw_version=self._attributes.get(ATTR_VERSION_HW),
+            sw_version=self._attributes.get(ATTR_VERSION_FW)
+        )
 
     @property
     def source_type(self) -> SourceType:
@@ -133,9 +127,6 @@ class TraccarEntity(TrackerEntity, RestoreEntity):
     async def async_added_to_hass(self) -> None:
         """Register state update callback."""
         await super().async_added_to_hass()
-        self._unsub_dispatcher = async_dispatcher_connect(
-            self.hass, TRACKER_UPDATE, self._async_receive_data
-        )
 
         # don't restore if we got created with data
         if self._latitude is not None or self._longitude is not None:
@@ -162,25 +153,4 @@ class TraccarEntity(TrackerEntity, RestoreEntity):
             ATTR_BEARING: attr.get(ATTR_BEARING),
             ATTR_SPEED: attr.get(ATTR_SPEED),
         }
-        self._battery = attr.get(ATTR_BATTERY)
-
-    async def async_will_remove_from_hass(self) -> None:
-        """Clean up after entity before removal."""
-        await super().async_will_remove_from_hass()
-        self._unsub_dispatcher()
-
-    @callback
-    def _async_receive_data(
-        self, server, device, position
-    ):
-        """Mark the device as seen."""
-        if server != self._server or device.unique_id != self._device_unique_id:
-            return
-
-        self._name = device.name
-        self._latitude = position.latitude
-        self._longitude = position.longitude
-        self._battery = position.attributes.get("batteryLevel", -1)
-        self._accuracy = position.accuracy or 0.0
-        self._attributes.update(position.attributes)
-        self.async_write_ha_state()
+        self._battery = attr.get(ATTR_BATTERY_LEVEL)

@@ -10,7 +10,8 @@
                     "verify_ssl": "Verify SSL",
                     "username": "Username",
                     "password": "Password",
-                    "scan_interval": "Scan Interval(Seconds)"
+                    "scan_interval": "Scan Interval(Seconds)",
+                    "sensors": "Sensors"
                 },
                 "title": "Traccar"
             }
@@ -27,7 +28,8 @@
                     "verify_ssl": "Verify SSL",
                     "username": "Username",
                     "password": "Password",
-                    "scan_interval": "Scan Interval(Seconds)"
+                    "scan_interval": "Scan Interval(Seconds)",
+                    "sensors": "Sensors"
                 },
                 "title": "Traccar"
             }
