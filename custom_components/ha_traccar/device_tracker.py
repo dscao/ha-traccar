@@ -66,7 +66,7 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         self._update_traccar_info(device, position)
 
     def _update_traccar_info(self, device, position):
-        self._name = device.name        
+        self._name = device.name
         self._latitude = position.latitude
         self._longitude = position.longitude
         self._battery = position.attributes.get(ATTR_BATTERY_LEVEL, -1)
