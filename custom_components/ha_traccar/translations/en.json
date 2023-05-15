@@ -90,6 +90,9 @@
 					"hours": {
 						"name": "hours"
 					},
+					"address": {
+						"name": "address"
+					},
 					"source_type": {
 						"name": "source_type",
 						"state": {

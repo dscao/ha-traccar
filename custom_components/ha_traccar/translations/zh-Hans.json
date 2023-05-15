@@ -90,6 +90,9 @@
 					"hours": {
 						"name": "小时"
 					},
+					"address": {
+						"name": "地址"
+					},
 					"source_type": {
 						"name": "数据源",
 						"state": {

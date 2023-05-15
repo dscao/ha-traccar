@@ -76,6 +76,17 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         self._accuracy = position.accuracy or 0.0
         position.attributes["last_update"] = device.last_update
         position.attributes["device_status"] = device.status
+        if position.address:
+            addressstrlist = position.address.replace(" ","").split(",")
+            if len(addressstrlist) > 5:
+                addressstr = ""
+                for i in range(len(addressstrlist)-3, -1, -1):
+                    addressstr += addressstrlist[i]
+                position.attributes["address"] = addressstr
+            else:
+                position.attributes["address"] = position.address
+        else:
+            position.attributes["address"] = "unknown"
         self._attributes.update(position.attributes)
 
     @property
