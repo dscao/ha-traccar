@@ -105,7 +105,7 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
                 addressstrlist = position.address.replace(" ","").split(",")
                 if len(addressstrlist) > 5:
                     self._state = ""
-                    for i in range(len(addressstrlist)-3, 0, -1):
+                    for i in range(len(addressstrlist)-3, -1, -1):
                         self._state += addressstrlist[i]
                 else:
                     self._state = position.address
