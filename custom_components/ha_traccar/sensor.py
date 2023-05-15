@@ -117,4 +117,5 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
         await super().async_added_to_hass()
 
         if state := await self.async_get_last_state():
-            self._state = state.state
+            if state.state != "unknown":
+                self._state = state.state
