@@ -23,8 +23,10 @@ from .const import (
     CONF_SENSORS,
     ATTR_BATTERY_LEVEL,
     ATTR_BATTERY,
+    ATTR_ADDRESS,
     KEY_BATTERY_LEVEL,
     KEY_BATTERY,
+    KEY_ADDRESS,
 )
 
 from . import TraccarEntity
@@ -43,6 +45,10 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT
+    ),
+    SensorEntityDescription(
+        key=KEY_ADDRESS,
+        name="Address"
     )
 )
 
@@ -94,6 +100,8 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
             self._state = position.attributes.get(ATTR_BATTERY_LEVEL)
         elif self.entity_description.key == KEY_BATTERY:
             self._state = position.attributes.get(ATTR_BATTERY)
+        elif self.entity_description.key == KEY_ADDRESS:
+            self._state = position.address
 
     @property
     def native_value(self):

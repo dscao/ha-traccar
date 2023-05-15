@@ -66,11 +66,13 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         self._update_traccar_info(device, position)
 
     def _update_traccar_info(self, device, position):
-        self._name = device.name
+        self._name = device.name        
         self._latitude = position.latitude
         self._longitude = position.longitude
         self._battery = position.attributes.get(ATTR_BATTERY_LEVEL, -1)
         self._accuracy = position.accuracy or 0.0
+        position.attributes["last_update"] = device.last_update
+        position.attributes["device_status"] = device.status
         self._attributes.update(position.attributes)
 
     @property
@@ -140,6 +142,8 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
                 ATTR_ALTITUDE: None,
                 ATTR_BEARING: None,
                 ATTR_SPEED: None,
+                "last_update": None,
+                "device_status": None,
             }
             self._battery = None
             return
@@ -152,5 +156,7 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
             ATTR_ALTITUDE: attr.get(ATTR_ALTITUDE),
             ATTR_BEARING: attr.get(ATTR_BEARING),
             ATTR_SPEED: attr.get(ATTR_SPEED),
+            "last_update": attr.get("last_update"),
+            "device_status": attr.get("device_status"),
         }
         self._battery = attr.get(ATTR_BATTERY_LEVEL)

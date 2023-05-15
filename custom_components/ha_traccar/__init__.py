@@ -121,6 +121,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         except TraccarException as ex:
             _LOGGER.error("Error while updating device data: %s", ex)
             return
+            
+        _LOGGER.debug(devices)    
+        _LOGGER.debug(positions)
 
         for position in positions:
             device = next(
