@@ -34,5 +34,73 @@
                 "title": "Traccar"
             }
         }
-    }
+    },
+	"entity": {
+		"device_tracker": {
+			"traccar_device_tracker": {
+				"state_attributes": {
+					"speed": {
+						"name": "speed"
+					},
+					"course": {
+						"name": "course"
+					},
+					"device_status": {
+						"name": "evice_status"
+					},
+					"last_update": {
+						"name": "last_update"
+					},
+					"battery_level": {
+						"name": "Battery level"
+					},
+					"battery": {
+						"name": "battery"
+					},
+					"gps_accuracy": {
+						"name": "GPS accuracy"
+					},
+					"latitude": {
+						"name": "latitude"
+					},
+					"longitude": {
+						"name": "longitude"
+					},
+					"motion": {
+						"name": "motion"
+					},
+					"armed": {
+						"name": "armed"
+					},
+					"charge": {
+						"name": "charge"
+					},
+					"ignition": {
+						"name": "ignition"
+					},
+					"status": {
+						"name": "status"
+					},
+					"distance": {
+						"name": "distance"
+					},
+					"totalDistance": {
+						"name": "Total Distance"
+					},
+					"hours": {
+						"name": "hours"
+					},
+					"source_type": {
+						"name": "source_type",
+						"state": {
+							"bluetooth_le": "bluetooth_le",
+							"bluetooth": "bluetooth",
+							"gps": "GPS",
+							"router": "router"
+						}
+					}
+			    }
+			}
+		}
+	}
 }

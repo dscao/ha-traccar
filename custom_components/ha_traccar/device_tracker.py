@@ -56,7 +56,10 @@ async def async_setup_entry(
 
 
 class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
-    """Represent a tracked device."""
+    """Represent a tracked device."""    
+    _attr_has_entity_name = False
+    #_attr_name = None
+    _attr_translation_key = "traccar_device_tracker"
 
     def __init__(self, server, device, position):
         """Set up Geofency entity."""
@@ -142,8 +145,6 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
                 ATTR_ALTITUDE: None,
                 ATTR_BEARING: None,
                 ATTR_SPEED: None,
-                "last_update": None,
-                "device_status": None,
             }
             self._battery = None
             return
@@ -156,7 +157,5 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
             ATTR_ALTITUDE: attr.get(ATTR_ALTITUDE),
             ATTR_BEARING: attr.get(ATTR_BEARING),
             ATTR_SPEED: attr.get(ATTR_SPEED),
-            "last_update": attr.get("last_update"),
-            "device_status": attr.get("device_status"),
         }
         self._battery = attr.get(ATTR_BATTERY_LEVEL)
