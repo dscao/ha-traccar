@@ -100,8 +100,12 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
             self._state = position.attributes.get(ATTR_BATTERY_LEVEL)
         elif self.entity_description.key == KEY_BATTERY:
             self._state = position.attributes.get(ATTR_BATTERY)
-        elif self.entity_description.key == KEY_ADDRESS:
-            self._state = position.address
+        elif self.entity_description.key == KEY_ADDRESS:            
+            addressstrlist = position.address.replace(" ","").split(",")
+            if len(addressstrlist) > 5:
+                self._state = addressstrlist[5]+addressstrlist[4]+addressstrlist[3]+addressstrlist[2]+addressstrlist[1]+addressstrlist[0]
+            else:
+                self._state = position.address
 
     @property
     def native_value(self):
