@@ -48,7 +48,8 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
     ),
     SensorEntityDescription(
         key=KEY_ADDRESS,
-        name="Address"
+        name="Address",
+        icon="mdi:map"
     )
 )
 
