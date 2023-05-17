@@ -17,6 +17,7 @@ KEY_MOTION = "motion"
 KEY_ARMED = "armed"
 KEY_CHARGE = "charge"
 KEY_IGNITION = "ignition"
+KEY_ADDRESS = "address"
 
 ATTR_VERSION_HW = "versionHw"
 ATTR_VERSION_FW = "versionFw"

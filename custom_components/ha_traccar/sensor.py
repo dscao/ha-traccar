@@ -23,8 +23,10 @@ from .const import (
     CONF_SENSORS,
     ATTR_BATTERY_LEVEL,
     ATTR_BATTERY,
+    ATTR_ADDRESS,
     KEY_BATTERY_LEVEL,
     KEY_BATTERY,
+    KEY_ADDRESS,
 )
 
 from . import TraccarEntity
@@ -43,6 +45,11 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.VOLTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfElectricPotential.VOLT
+    ),
+    SensorEntityDescription(
+        key=KEY_ADDRESS,
+        name="Address",
+        icon="mdi:map"
     )
 )
 
@@ -94,6 +101,17 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
             self._state = position.attributes.get(ATTR_BATTERY_LEVEL)
         elif self.entity_description.key == KEY_BATTERY:
             self._state = position.attributes.get(ATTR_BATTERY)
+        elif self.entity_description.key == KEY_ADDRESS:
+            if position.address:
+                addressstrlist = position.address.replace(" ","").split(",")
+                if len(addressstrlist) > 5:
+                    self._state = ""
+                    for i in range(len(addressstrlist)-3, -1, -1):
+                        self._state += addressstrlist[i]
+                else:
+                    self._state = position.address
+            else:
+                self._state = "unknown"
 
     @property
     def native_value(self):
@@ -109,4 +127,5 @@ class TraccarSensorEntity(SensorEntity, TraccarEntity):
         await super().async_added_to_hass()
 
         if state := await self.async_get_last_state():
-            self._state = state.state
+            if state.state != "unknown":
+                self._state = state.state

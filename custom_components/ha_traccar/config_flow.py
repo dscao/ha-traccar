@@ -16,7 +16,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL
 )
 
-from .const import DOMAIN, CONF_SENSORS, KEY_ARMED, KEY_BATTERY_LEVEL, KEY_BATTERY, KEY_CHARGE, KEY_IGNITION, KEY_MOTION
+from .const import DOMAIN, CONF_SENSORS, KEY_ARMED, KEY_BATTERY_LEVEL, KEY_BATTERY, KEY_CHARGE, KEY_IGNITION, KEY_MOTION, ATTR_ADDRESS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,7 +26,8 @@ SENSOR_LIST = {
     KEY_ARMED: "Armed",
     KEY_MOTION: "Motion",
     KEY_IGNITION: "Ignition",
-    KEY_CHARGE: "Charge"
+    KEY_CHARGE: "Charge",
+    ATTR_ADDRESS: "Address"
 }
 
 
