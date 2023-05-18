@@ -136,6 +136,11 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         )
 
     @property
+    def should_poll(self):
+        """Return the polling requirement of the entity."""
+        return True
+        
+    @property
     def source_type(self) -> SourceType:
         """Return the source type, eg gps or router, of the device."""
         return SourceType.GPS
@@ -145,7 +150,8 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         await super().async_added_to_hass()
 
         # don't restore if we got created with data
-        if self._latitude is not None or self._longitude is not None:
+        
+        if self._latitude is not None and self._longitude is not None:
             return
 
         if (state := await self.async_get_last_state()) is None:
