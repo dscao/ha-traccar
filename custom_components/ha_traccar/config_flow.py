@@ -4,6 +4,7 @@ import logging
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.helpers.selector import SelectSelector, SelectSelectorConfig, SelectSelectorMode
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
     CONF_NAME,
@@ -16,20 +17,27 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL
 )
 
-from .const import DOMAIN, CONF_SENSORS, KEY_ARMED, KEY_BATTERY_LEVEL, KEY_BATTERY, KEY_CHARGE, KEY_IGNITION, KEY_MOTION, ATTR_ADDRESS
+from .const import (
+    DOMAIN, 
+    CONF_SENSORS,
+    CONF_ATTR_SHOW,
+    KEY_ARMED, 
+    KEY_BATTERY_LEVEL, 
+    KEY_BATTERY, 
+    KEY_CHARGE, 
+    KEY_IGNITION, 
+    KEY_MOTION, 
+    KEY_LAST_UPDATE,  
+    KEY_ADDRESS,     
+    KEY_QUERYTIME, 
+    KEY_LASTSTOPTIME, 
+    KEY_PARKING_TIME,
+    KEY_DEVICE_STATUS,
+    KEY_TOTALDISTANCE,
+    KEY_SPEED
+)
 
 _LOGGER = logging.getLogger(__name__)
-
-SENSOR_LIST = {
-    KEY_BATTERY_LEVEL: "Battery Level",
-    KEY_BATTERY: "Battery",
-    KEY_ARMED: "Armed",
-    KEY_MOTION: "Motion",
-    KEY_IGNITION: "Ignition",
-    KEY_CHARGE: "Charge",
-    ATTR_ADDRESS: "Address"
-}
-
 
 class TraccarFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Met Eireann component."""
@@ -59,7 +67,28 @@ class TraccarFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         vol.Required(CONF_USERNAME): cv.string,
                         vol.Required(CONF_PASSWORD): cv.string,
                         vol.Required(CONF_SCAN_INTERVAL, default=5): vol.Coerce(int),
-                        vol.Optional(CONF_SENSORS, default=list(SENSOR_LIST.keys())): cv.multi_select(SENSOR_LIST),
+                        vol.Optional(CONF_ATTR_SHOW, default=False): cv.boolean,
+                        vol.Optional(CONF_SENSORS): SelectSelector(
+                            SelectSelectorConfig(
+                                options=[
+                                    {"value": KEY_BATTERY_LEVEL, "label": "battery_level"},
+                                    {"value": KEY_BATTERY, "label": "battery"},
+                                    {"value": KEY_SPEED, "label": "speed"},
+                                    {"value": KEY_TOTALDISTANCE, "label": "totaldistance"},
+                                    {"value": KEY_ARMED, "label": "armed"},
+                                    {"value": KEY_MOTION, "label": "motion"},
+                                    {"value": KEY_IGNITION, "label": "ignition"},
+                                    {"value": KEY_CHARGE, "label": "charge"},
+                                    {"value": KEY_ADDRESS, "label": "address"},
+                                    {"value": KEY_LAST_UPDATE, "label": "last_update"},
+                                    {"value": KEY_QUERYTIME, "label": "querytime"},
+                                    {"value": KEY_LASTSTOPTIME, "label": "laststoptime"},
+                                    {"value": KEY_PARKING_TIME, "label": "parkingtime"},
+                                    {"value": KEY_DEVICE_STATUS, "label": "device_status"}
+                                ], 
+                                multiple=True,translation_key=CONF_SENSORS
+                            )
+                        ),                       
                     }
             ),
             errors=errors,
@@ -103,7 +132,29 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_USERNAME, default=self.config.get(CONF_USERNAME)): cv.string,
                         vol.Required(CONF_PASSWORD, default=self.config.get(CONF_PASSWORD)): cv.string,
                         vol.Required(CONF_SCAN_INTERVAL, default=self.config.get(CONF_SCAN_INTERVAL)): vol.Coerce(int),
-                        vol.Optional(CONF_SENSORS, default=self.config.get(CONF_SENSORS)): cv.multi_select(SENSOR_LIST),
+                        vol.Optional(CONF_ATTR_SHOW, default=self.config.get(CONF_ATTR_SHOW)): cv.boolean,
+                        vol.Optional(CONF_SENSORS, default=self.config.get(CONF_SENSORS)): SelectSelector(
+                            SelectSelectorConfig(
+                                options=[
+                                    {"value": KEY_BATTERY_LEVEL, "label": "batterylevel"},
+                                    {"value": KEY_BATTERY, "label": "battery"},
+                                    {"value": KEY_SPEED, "label": "speed"},
+                                    {"value": KEY_TOTALDISTANCE, "label": "totaldistance"},
+                                    {"value": KEY_ARMED, "label": "armed"},
+                                    {"value": KEY_MOTION, "label": "motion"},
+                                    {"value": KEY_IGNITION, "label": "ignition"},
+                                    {"value": KEY_CHARGE, "label": "charge"},
+                                    {"value": KEY_ADDRESS, "label": "address"},
+                                    {"value": KEY_LAST_UPDATE, "label": "last_update"},
+                                    {"value": KEY_QUERYTIME, "label": "querytime"},
+                                    {"value": KEY_LASTSTOPTIME, "label": "laststoptime"},
+                                    {"value": KEY_PARKING_TIME, "label": "parkingtime"},
+                                    {"value": KEY_DEVICE_STATUS, "label": "device_status"}
+                                ], 
+                                multiple=True,translation_key=CONF_SENSORS
+                            )
+                        ),
+                        
                     }
             ),
             errors=errors,

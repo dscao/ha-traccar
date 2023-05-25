@@ -11,7 +11,8 @@
                     "username": "Username",
                     "password": "Password",
                     "scan_interval": "Scan Interval(Seconds)",
-                    "sensors": "Sensors"
+                    "sensors": "Sensors",
+					"attr_show": "Show More Attr"
                 },
                 "title": "Traccar"
             }
@@ -29,12 +30,34 @@
                     "username": "Username",
                     "password": "Password",
                     "scan_interval": "Scan Interval(Seconds)",
-                    "sensors": "Sensors"
+                    "sensors": "Sensors",
+					"attr_show": "Show More Attr",
+					"gps_conver": "conver gps from GJC02 to GPS84"
                 },
                 "title": "Traccar"
             }
         }
     },
+	"selector": {
+		"sensors": {
+			"options": {
+				"battery_level": "Battery Level",
+				"battery": "Battery",
+				"speed": "Speed",
+				"totaldistance": "Total Distance",
+				"motion": "Motion",
+				"armed": "Armed",
+				"charge": "Charge",
+				"ignition": "Ignition",
+				"address": "Address",
+				"last_update": "Last update",
+				"querytime": "Query time",				
+				"laststoptime": "Last stop time",
+				"parkingtime": "Parking time",
+				"device_status": "Device_status"
+			}
+		}
+	},
 	"entity": {
 		"device_tracker": {
 			"traccar_device_tracker": {
@@ -46,12 +69,12 @@
 						"name": "course"
 					},
 					"device_status": {
-						"name": "evice_status"
+						"name": "device_status"
 					},
 					"last_update": {
 						"name": "last_update"
 					},
-					"battery_level": {
+					"BatteryLevel": {
 						"name": "Battery level"
 					},
 					"battery": {
@@ -78,6 +101,9 @@
 					"ignition": {
 						"name": "ignition"
 					},
+					"blocked": {
+						"name": "blocked"
+					},
 					"status": {
 						"name": "status"
 					},
@@ -90,8 +116,20 @@
 					"hours": {
 						"name": "hours"
 					},
+					"rssi": {
+						"name": "rssi"
+					},
 					"address": {
 						"name": "address"
+					},
+					"querytime": {
+						"name": "query time"
+					},
+					"laststoptime": {
+						"name": "last stop time"
+					},
+					"parkingtime": {
+						"name": "parking time"
 					},
 					"source_type": {
 						"name": "source_type",
@@ -104,6 +142,122 @@
 					}
 			    }
 			}
-		}
+		},
+		"sensor": {
+			"parkingtime": {
+				"name": "Parking time",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"laststoptime": {
+				"name": "Last stop time",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"battery_level": {
+				"name": "Battery Level",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"battery": {
+				"name": "Battery",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"speed": {
+				"name": "speed",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"totaldistance": {
+				"name": "total Distance",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"address": {
+				"name": "Address",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"last_update": {
+				"name": "Last_update",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"querytime": {
+				"name": "Querytime"
+			},
+			"device_status": {
+				"name": "Device_status",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				},
+				"state": {
+					"online": "online",
+					"offline": "offline",
+					"unknown": "unknown"
+				}
+			}
+	    },
+		"binary_sensor": {			
+			"armed": {
+				"name": "Armed",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"motion": {
+				"name": "Motion",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"ignition": {
+				"name": "Ignition",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			},
+			"charge": {
+				"name": "Charge",
+				"state_attributes": {
+					"querytime": {
+					  "name": "Query time"
+					}
+				}
+			}
+	    }
 	}
 }

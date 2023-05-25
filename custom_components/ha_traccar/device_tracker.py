@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-
+import time, datetime
 
 from homeassistant.components.device_tracker import (
     SourceType,
@@ -25,6 +25,7 @@ from .const import (
     ATTR_LATITUDE,
     ATTR_LONGITUDE,
     ATTR_SPEED,
+    CONF_ATTR_SHOW,
     ATTR_VERSION_HW,
     ATTR_VERSION_FW
 )
@@ -37,10 +38,9 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Configure a dispatcher connection based on a config entry."""
-
+    """Configure a dispatcher connection based on a config entry."""    
     @callback
-    def _receive_data(server, device, position):
+    def _receive_data(server, device, position,calculatedata, attr_show):
         """Receive set location."""
         if device.unique_id in hass.data[DOMAIN][entry.entry_id][DEVICE_TRACKERS]:
             return
@@ -49,7 +49,7 @@ async def async_setup_entry(
             device.unique_id)
 
         async_add_entities(
-            [TraccarDeviceTrackerEntity(server, device, position)]
+            [TraccarDeviceTrackerEntity(server, device, position, calculatedata, attr_show)]
         )
 
     async_dispatcher_connect(hass, TRACKER_UPDATE, _receive_data)
@@ -57,42 +57,54 @@ async def async_setup_entry(
 
 class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
     """Represent a tracked device."""    
-    _attr_has_entity_name = False
+    _attr_has_entity_name = True
     #_attr_name = None
     _attr_translation_key = "traccar_device_tracker"
 
-    def __init__(self, server, device, position):
+    def __init__(self, server, device, position, calculatedata, attr_show):
         """Set up Geofency entity."""
         super().__init__(server, device)
         self._attributes = {}
         self._unique_id = f"{server}-{device.unique_id}-device_tracker"
-        self._update_traccar_info(device, position)
+        self._attr_show = attr_show
+        self._update_traccar_info(device, position, calculatedata, attr_show)        
 
-    def _update_traccar_info(self, device, position):
+    def _update_traccar_info(self, device, position, calculatedata, attr_show):                         
         self._name = device.name
         self._latitude = position.latitude
         self._longitude = position.longitude
         self._battery = position.attributes.get(ATTR_BATTERY_LEVEL, -1)
         self._accuracy = position.accuracy or 0.0
-        position.attributes["last_update"] = device.last_update
-        position.attributes["device_status"] = device.status
-        if position.address:
-            addressstrlist = position.address.replace(" ","").split(",")
-            if len(addressstrlist) > 5:
-                addressstr = ""
-                for i in range(len(addressstrlist)-3, -1, -1):
-                    addressstr += addressstrlist[i]
-                position.attributes["address"] = addressstr
+        self._speed = position.speed or 0.0
+        if attr_show == True:
+            position.attributes["last_update"] = device.last_update
+            position.attributes["device_status"] = device.status
+            position.attributes["battery_level"] = self._battery
+            position.attributes["speed"] = self._speed
+            if position.address:
+                addressstrlist = position.address.replace(" ","").split(",")
+                if len(addressstrlist) > 5:
+                    addressstr = ""
+                    for i in range(len(addressstrlist)-3, -1, -1):
+                        addressstr += addressstrlist[i]
+                    position.attributes["address"] = addressstr
+                else:
+                    position.attributes["address"] = position.address
             else:
-                position.attributes["address"] = position.address
-        else:
-            position.attributes["address"] = "unknown"
-        self._attributes.update(position.attributes)
+                position.attributes["address"] = "unknown"                
 
-    @property
-    def battery_level(self):
-        """Return battery value of the device."""
-        return self._battery
+            position.attributes["parkingtime"] = calculatedata["parkingtime"]
+            position.attributes["laststoptime"] = calculatedata["laststoptime"]
+            position.attributes["querytime"] = calculatedata["querytime"]            
+            
+            self._attributes.update(position.attributes)
+        else:
+            self._attributes={}
+
+    # @property
+    # def battery_level(self):
+        # """Return battery value of the device."""
+        # return self._battery
 
     @property
     def extra_state_attributes(self):
@@ -114,10 +126,6 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         """Return the gps accuracy of the device."""
         return self._accuracy
 
-    @property
-    def name(self):
-        """Return the name of the device."""
-        return self._name
 
     @property
     def unique_id(self):
@@ -175,4 +183,4 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
             ATTR_BEARING: attr.get(ATTR_BEARING),
             ATTR_SPEED: attr.get(ATTR_SPEED),
         }
-        self._battery = attr.get(ATTR_BATTERY_LEVEL)
+        # self._battery = attr.get(ATTR_BATTERY_LEVEL)

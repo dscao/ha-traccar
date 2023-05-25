@@ -3,8 +3,8 @@
   "name": "Traccar",
   "documentation": "https://github.com/ryanh7/ha-traccar",
   "requirements": ["pytraccar==1.0.0"],
-  "codeowners": ["@ryanh7"],
+  "codeowners": ["@ryanh7","@dscao"],
   "config_flow": true,
   "iot_class": "local_polling",
-  "version": "1.0.0"
+  "version": "2.0.0"
 }

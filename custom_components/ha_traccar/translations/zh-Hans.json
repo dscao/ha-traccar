@@ -11,7 +11,8 @@
                     "username": "用户名",
                     "password": "密码",
                     "scan_interval": "扫描间隔(秒)",
-                    "sensors": "传感器"
+                    "sensors": "传感器",
+					"attr_show": "显示尽量多的属性"
                 },
                 "title": "Traccar"
             }
@@ -29,12 +30,34 @@
                     "username": "用户名",
                     "password": "密码",
                     "scan_interval": "扫描间隔(秒)",
-                    "sensors": "传感器"
+                    "sensors": "传感器",
+					"attr_show": "显示尽量多的属性",
+					"gps_conver": "将GCJ02(火星坐标系)转GPS84"
                 },
                 "title": "Traccar"
             }
         }
     },
+	"selector": {
+		"sensors": {
+			"options": {
+				"battery_level": "电池电量",
+				"battery": "电池",
+				"speed": "速度",
+				"totaldistance": "总里程",
+				"motion": "移动",
+				"armed": "警告",
+				"charge": "充电",
+				"ignition": "点火",
+				"address": "地址",
+				"last_update": "更新时间",
+				"querytime": "查询时间",				
+				"laststoptime": "上次停车时间",
+				"parkingtime": "停车时长",
+				"device_status": "设备状态"
+			}
+		}
+	},
 	"entity": {
 		"device_tracker": {
 			"traccar_device_tracker": {
@@ -51,7 +74,7 @@
 					"last_update": {
 						"name": "更新时间"
 					},
-					"battery_level": {
+					"BatteryLevel": {
 						"name": "电池电量"
 					},
 					"battery": {
@@ -78,6 +101,9 @@
 					"ignition": {
 						"name": "点火"
 					},
+					"blocked": {
+						"name": "屏蔽"
+					},
 					"status": {
 						"name": "状态"
 					},
@@ -90,8 +116,20 @@
 					"hours": {
 						"name": "小时"
 					},
+					"rssi": {
+						"name": "信号强度"
+					},
 					"address": {
 						"name": "地址"
+					},
+					"querytime": {
+						"name": "查询时间"
+					},
+					"laststoptime": {
+						"name": "上次停车时间"
+					},
+					"parkingtime": {
+						"name": "停车时长"
 					},
 					"source_type": {
 						"name": "数据源",
@@ -104,6 +142,122 @@
 					}
 			    }
 			}
-		}
+		},
+		"sensor": {
+			"parkingtime": {
+				"name": "停车时长",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"laststoptime": {
+				"name": "上次停车时间",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"battery_level": {
+				"name": "电池电量",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"battery": {
+				"name": "电池",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"speed": {
+				"name": "速度",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"totaldistance": {
+				"name": "总里程",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"address": {
+				"name": "地址",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"last_update": {
+				"name": "更新时间",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"querytime": {
+				"name": "查询时间"
+			},
+			"device_status": {
+				"name": "设备状态",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				},
+				"state": {
+					"online": "在线",
+					"offline": "离线",
+					"unknown": "未知"
+				}
+			}
+	    },
+		"binary_sensor": {			
+			"armed": {
+				"name": "警告",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"motion": {
+				"name": "移动",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"ignition": {
+				"name": "点火",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			},
+			"charge": {
+				"name": "充电",
+				"state_attributes": {
+					"querytime": {
+					  "name": "查询时间"
+					}
+				}
+			}
+	    }		
 	}
 }

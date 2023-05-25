@@ -35,22 +35,22 @@ from . import TraccarEntity
 BINARY_SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
     BinarySensorEntityDescription(
         key=KEY_MOTION,
-        name="Motion",
+        name="motion",
         device_class=BinarySensorDeviceClass.MOTION
     ),
     BinarySensorEntityDescription(
         key=KEY_ARMED,
-        name="Armed",
+        name="armed",
         device_class=BinarySensorDeviceClass.SAFETY
     ),
     BinarySensorEntityDescription(
         key=KEY_CHARGE,
-        name="Charge",
+        name="charge",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING
     ),
     BinarySensorEntityDescription(
         key=KEY_IGNITION,
-        name="Ignition",
+        name="ignition",
         device_class=BinarySensorDeviceClass.POWER
     ),
 )
@@ -73,7 +73,7 @@ async def async_setup_entry(
         CONF_SENSORS, []) if s in BINARY_SENSOR_TYPES_KEYS]
 
     @callback
-    def _receive_data(server, device, position):
+    def _receive_data(server, device, position, calculatedata, attr_show):
         for sensor_type in enabled_sensors:
             sensor_id = f"{device.unique_id}-{sensor_type}"
             if sensor_id in hass.data[DOMAIN][entry.entry_id][SENSORS]:
@@ -83,19 +83,20 @@ async def async_setup_entry(
 
             async_add_entities(
                 [TraccarBinarySensorEntity(
-                    BINARY_SENSOR_TYPES_MAP[sensor_type], server, device, position)]
+                    BINARY_SENSOR_TYPES_MAP[sensor_type], server, device, position, calculatedata, attr_show)]
             )
 
     async_dispatcher_connect(hass, TRACKER_UPDATE, _receive_data)
 
 
 class TraccarBinarySensorEntity(BinarySensorEntity, TraccarEntity):
+    _attr_has_entity_name = True
 
-    def __init__(self, description, server, device, position):
+    def __init__(self, description, server, device, position, calculatedata, attr_show):
         super().__init__(server, device)
         self.entity_description = description
         self._unique_id = f"{server}-{device.unique_id}-{description.key}"
-
+        self._attr_translation_key = f"{self.entity_description.name}"
         attr_map = {
             KEY_MOTION: ATTR_MOTION,
             KEY_ARMED: ATTR_ARMED,
@@ -103,17 +104,12 @@ class TraccarBinarySensorEntity(BinarySensorEntity, TraccarEntity):
             KEY_IGNITION: ATTR_IGNITION
         }
         self._attributes_key = attr_map.get(description.key)
-        self._update_traccar_info(device, position)
+        self._update_traccar_info(device, position, calculatedata, attr_show)
 
-    def _update_traccar_info(self, device, position):
-        self._name = f"{device.name} {self.entity_description.name}"
+    def _update_traccar_info(self, device, position, calculatedata, attr_show):
         if (_state := position.attributes.get(self._attributes_key)) is not None:
             self._attr_is_on = _state
 
-    @property
-    def name(self):
-        """Return the name of the device."""
-        return self._name
 
     @property
     def unique_id(self):
