@@ -67,6 +67,7 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
         self._attributes = {}
         self._unique_id = f"{server}-{device.unique_id}-device_tracker"
         self._attr_show = attr_show
+        self._model = position.protocol
         self._update_traccar_info(device, position, calculatedata, attr_show)        
 
     def _update_traccar_info(self, device, position, calculatedata, attr_show):                         
@@ -139,6 +140,7 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
             identifiers={(DOMAIN, self._device_info_id)},
             name=self._name,
             manufacturer="Traccar",
+            model=self._model,
             hw_version=self._attributes.get(ATTR_VERSION_HW),
             sw_version=self._attributes.get(ATTR_VERSION_FW)
         )
