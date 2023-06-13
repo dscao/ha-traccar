@@ -35,8 +35,8 @@ from . import TraccarEntity
 BINARY_SENSOR_TYPES: tuple[BinarySensorEntityDescription, ...] = (
     BinarySensorEntityDescription(
         key=KEY_MOTION,
-        name="motion",
-        device_class=BinarySensorDeviceClass.MOTION
+        name="moving",
+        device_class=BinarySensorDeviceClass.MOVING
     ),
     BinarySensorEntityDescription(
         key=KEY_ARMED,
