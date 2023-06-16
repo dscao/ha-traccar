@@ -151,8 +151,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 with open(filename, 'r') as f:
                     data = json.load(f)
                 return data
-            # if not os.path.exists('/config/traccar_lastlocationtime.json'):
-                # save_to_file('/config/traccar_lastlocationtime.json', {})
+                
+            path = hass.config.path(f'.storage')
+            
+            if not os.path.exists(f'{path}/traccar_lastlocationtime.json'):
+                save_to_file(f'{path}/traccar_lastlocationtime.json', {})
             
             def time_diff (timestamp):
                 result = datetime.datetime.now() - datetime.datetime.fromtimestamp(timestamp)
@@ -167,38 +170,39 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                     return("{0}分钟{1}秒".format(minutes,seconds))
                 else:
                     return("{0}秒".format(seconds))     
-            if not varstinydict.get("lastupdate_"+str(position.device_id)):
-                varstinydict["lastupdate_"+str(position.device_id)]=""                
+            if not varstinydict.get("lastupdate_"+str(position.device_id)):                
+                varstinydict["lastupdate_"+str(position.device_id)]=""
+                varstinydictlasttime = read_from_file(f'{path}/traccar_lastlocationtime.json')
             if not varstinydict.get("lasttotaldistance_"+str(position.device_id)):
-                varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0,0]
+                varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0,0,0]
             if not varstinydict.get("lastlocationtime_"+str(position.device_id)):
-                varstinydict["lastlocationtime_"+str(position.device_id)]=0
-                # varstinydictlasttime = read_from_file('/config/traccar_lastlocationtime.json')
-                # if varstinydictlasttime["lastlocationtime_"+str(position.device_id)]:
-                    # varstinydict["lastlocationtime_"+str(position.device_id)]= ["lastlocationtime_"+str(position.device_id)]
-                # else:
-                    # varstinydict["lastlocationtime_"+str(position.device_id)]=0
+                varstinydict["lastlocationtime_"+str(position.device_id)]=0                
+                if varstinydictlasttime.get("lastlocationtime_"+str(position.device_id)):
+                    varstinydict["lastlocationtime_"+str(position.device_id)] = varstinydictlasttime["lastlocationtime_"+str(position.device_id)]
+                else:
+                    varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not varstinydict.get("updatetime_"+str(position.device_id)):
-                varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now()
+                varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not varstinydict.get("runorstop_"+str(position.device_id)):
-                varstinydict["runorstop_"+str(position.device_id)] = "run"
+                varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 
-            #计算两次总里程的历史变化值，如果两次有一次没变则保持静止，忽略掉gps信号偶然漂移,一次位移大于10000米的回到00点
+            #计算两次总里程的历史变化值，如果相邻三次有一次没变则保持静止，忽略掉gps信号偶然漂移,一次位移大于10000米的回到00点
             thisdistance = varstinydict["lasttotaldistance_"+str(position.device_id)][0] - varstinydict["lasttotaldistance_"+str(position.device_id)][1]
             lastdistance = varstinydict["lasttotaldistance_"+str(position.device_id)][1] - varstinydict["lasttotaldistance_"+str(position.device_id)][2]
-            if thisdistance == 0 or lastdistance == 0 or thisdistance > 10000:
+            lastdistance2 = varstinydict["lasttotaldistance_"+str(position.device_id)][2] - varstinydict["lasttotaldistance_"+str(position.device_id)][3]
+            if thisdistance == 0 or lastdistance == 0 or lastdistance2 == 0 or thisdistance > 10000:
                 thisdistance = 0
             thistotaldistance = position.attributes.get("totalDistance")            
             
             # 设备数据更新后，或者刷新时间相差2分钟以上，刷新总里程的历史数据
             lastupdate = device.last_update
-            if lastupdate != varstinydict["lastupdate_"+str(position.device_id)] or datetime.datetime.now() - varstinydict["updatetime_"+str(position.device_id)] > datetime.timedelta(seconds=120):
+            if lastupdate != varstinydict["lastupdate_"+str(position.device_id)] or datetime.datetime.now() - datetime.datetime.strptime(varstinydict["updatetime_"+str(position.device_id)], "%Y-%m-%d %H:%M:%S") > datetime.timedelta(seconds=120):
                 varstinydict["lastupdate_"+str(position.device_id)] = lastupdate            
+                varstinydict["lasttotaldistance_"+str(position.device_id)][3] = varstinydict["lasttotaldistance_"+str(position.device_id)][2]
                 varstinydict["lasttotaldistance_"+str(position.device_id)][2] = varstinydict["lasttotaldistance_"+str(position.device_id)][1]
                 varstinydict["lasttotaldistance_"+str(position.device_id)][1] = varstinydict["lasttotaldistance_"+str(position.device_id)][0]
                 varstinydict["lasttotaldistance_"+str(position.device_id)][0] = thistotaldistance
-                varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now()
-            
+                varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")           
             
             thisspeed = position.speed
             
@@ -209,23 +213,23 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 _LOGGER.debug("变为静止1")
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                # save_to_file('/config/traccar_lastlocationtime.json', varstinydict)
+                save_to_file(f'{path}/traccar_lastlocationtime.json', varstinydict)
                 
         
-            # 速度大于0且当前里程大于0时，状态从运动改为运动
-            elif thisspeed > 0 and  thisdistance>0 and varstinydict["runorstop_"+str(position.device_id)]=="stop":
+            # 速度大于0且当前里程大于0时，状态改为运动
+            elif thisspeed > 0 and thisdistance>0 and varstinydict["runorstop_"+str(position.device_id)]=="stop":
                 _LOGGER.debug("变为运动1")
                 varstinydict["runorstop_"+str(position.device_id)] = "run"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = 0
             
-            # 设备超过300秒没有向服务器更新数据且上次到达时间比更新时间晚，则设置上次到达时间为上次更新时间。
+            # 设备超过300秒没有向服务器更新数据且上次到达时间比更新时间晚，同时恢复的时间也比更新时间晚，则设置上次到达时间为上次更新时间。
             last_update_datetime = datetime.datetime.fromisoformat(lastupdate)
             lastupdatetime = (datetime.datetime.strptime(lastupdate, '%Y-%m-%dT%H:%M:%S.%f+00:00') + datetime.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
             if datetime.datetime.now(pytz.utc) - last_update_datetime > datetime.timedelta(seconds=300) and time.strptime(varstinydict["lastlocationtime_"+str(position.device_id)], "%Y-%m-%d %H:%M:%S") > time.strptime(lastupdatetime, "%Y-%m-%d %H:%M:%S"): 
                 _LOGGER.debug("变为静止2")
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = lastupdatetime
-                # save_to_file('/config/traccar_lastlocationtime.json', varstinydict)
+                save_to_file(f'{path}/traccar_lastlocationtime.json', varstinydict)
                 
             lastlocationtime = varstinydict["lastlocationtime_"+str(position.device_id)]
             if lastlocationtime != 0:
