@@ -154,8 +154,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 
             path = hass.config.path(f'.storage')
             
-            if not os.path.exists(f'{path}/traccar_lastlocationtime.json'):
-                save_to_file(f'{path}/traccar_lastlocationtime.json', {})
+            if not os.path.exists(f'{path}/ha_traccar.json'):
+                save_to_file(f'{path}/ha_traccar.json', {})
+                
+            varstinydict = read_from_file(f'{path}/ha_traccar.json')
             
             def time_diff (timestamp):
                 result = datetime.datetime.now() - datetime.datetime.fromtimestamp(timestamp)
@@ -169,18 +171,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 elif minutes > 0:
                     return("{0}分钟{1}秒".format(minutes,seconds))
                 else:
-                    return("{0}秒".format(seconds))     
+                    return("{0}秒".format(seconds))    
+                    
             if not varstinydict.get("lastupdate_"+str(position.device_id)):                
-                varstinydict["lastupdate_"+str(position.device_id)]=""
-                varstinydictlasttime = read_from_file(f'{path}/traccar_lastlocationtime.json')
+                varstinydict["lastupdate_"+str(position.device_id)]=""                
             if not varstinydict.get("lasttotaldistance_"+str(position.device_id)):
                 varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0,0,0]
             if not varstinydict.get("lastlocationtime_"+str(position.device_id)):
-                varstinydict["lastlocationtime_"+str(position.device_id)]=0                
-                if varstinydictlasttime.get("lastlocationtime_"+str(position.device_id)):
-                    varstinydict["lastlocationtime_"+str(position.device_id)] = varstinydictlasttime["lastlocationtime_"+str(position.device_id)]
-                else:
-                    varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")                    
             if not varstinydict.get("updatetime_"+str(position.device_id)):
                 varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not varstinydict.get("runorstop_"+str(position.device_id)):
@@ -213,7 +211,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 _LOGGER.debug("变为静止1")
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                save_to_file(f'{path}/traccar_lastlocationtime.json', varstinydict)
+                save_to_file(f'{path}/ha_traccar.json', varstinydict)
                 
         
             # 速度大于0且当前里程大于0时，状态改为运动
@@ -229,7 +227,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 _LOGGER.debug("变为静止2")
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = lastupdatetime
-                save_to_file(f'{path}/traccar_lastlocationtime.json', varstinydict)
+                save_to_file(f'{path}/ha_traccar.json', varstinydict)
                 
             lastlocationtime = varstinydict["lastlocationtime_"+str(position.device_id)]
             if lastlocationtime != 0:
