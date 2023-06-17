@@ -153,7 +153,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 return data
                 
             path = hass.config.path(f'.storage')
-            
+            global varstinydict
             if not os.path.exists(f'{path}/ha_traccar.json'):
                 save_to_file(f'{path}/ha_traccar.json', {})
                 
