@@ -58,7 +58,7 @@ async def async_setup_entry(
 class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
     """Represent a tracked device."""    
     _attr_has_entity_name = True
-    #_attr_name = None
+    _attr_name = None
     _attr_translation_key = "traccar_device_tracker"
 
     def __init__(self, server, device, position, calculatedata, attr_show):
