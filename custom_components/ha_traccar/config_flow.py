@@ -133,7 +133,7 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                         vol.Required(CONF_PASSWORD, default=self.config.get(CONF_PASSWORD)): cv.string,
                         vol.Required(CONF_SCAN_INTERVAL, default=self.config.get(CONF_SCAN_INTERVAL)): vol.Coerce(int),
                         vol.Optional(CONF_ATTR_SHOW, default=self.config.get(CONF_ATTR_SHOW)): cv.boolean,
-                        vol.Optional(CONF_SENSORS, default=self.config.get(CONF_SENSORS)): SelectSelector(
+                        vol.Optional(CONF_SENSORS, default=self.config.get(CONF_SENSORS,[])): SelectSelector(
                             SelectSelectorConfig(
                                 options=[
                                     {"value": KEY_BATTERY_LEVEL, "label": "batterylevel"},
