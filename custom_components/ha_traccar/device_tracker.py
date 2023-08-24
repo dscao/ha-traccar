@@ -95,6 +95,7 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
                 position.attributes["address"] = "unknown"                
 
             position.attributes["parkingtime"] = calculatedata["parkingtime"]
+            position.attributes["runorstop"] = calculatedata["runorstop"]
             position.attributes["laststoptime"] = calculatedata["laststoptime"]
             position.attributes["querytime"] = calculatedata["querytime"]            
             
