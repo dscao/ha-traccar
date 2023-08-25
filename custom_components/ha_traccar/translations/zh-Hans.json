@@ -51,7 +51,8 @@
 				"ignition": "点火",
 				"address": "地址",
 				"last_update": "更新时间",
-				"querytime": "查询时间",				
+				"querytime": "查询时间",
+                "runorstop": "是否运动",
 				"laststoptime": "上次停车时间",
 				"parkingtime": "停车时长",
 				"device_status": "设备状态"

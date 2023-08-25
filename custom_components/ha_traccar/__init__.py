@@ -223,10 +223,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 varstinydict["runorstop_"+str(position.device_id)] = "run"
                 # varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
-            # 设备超过600秒没有向服务器更新数据且上次到达时间比更新时间晚，同时恢复的时间也比更新时间晚，则设置上次到达时间为上次更新时间。
+            # 设备超过1200秒没有向服务器更新数据，且原来为运动状态，则设置上次到达时间为上次更新时间（设备到达后立即断电导致停止状态未发送的情况）。
             last_update_datetime = datetime.datetime.fromisoformat(lastupdate)
             lastupdatetime = (datetime.datetime.strptime(lastupdate, '%Y-%m-%dT%H:%M:%S.%f+00:00') + datetime.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
-            if datetime.datetime.now(pytz.utc) - last_update_datetime > datetime.timedelta(seconds=600) and time.strptime(varstinydict["lastlocationtime_"+str(position.device_id)], "%Y-%m-%d %H:%M:%S") > time.strptime(lastupdatetime, "%Y-%m-%d %H:%M:%S"): 
+            if datetime.datetime.now(pytz.utc) - last_update_datetime > datetime.timedelta(seconds=1200) and varstinydict["runorstop_"+str(position.device_id)]=="run":
                 _LOGGER.debug("变为静止2")
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 varstinydict["lastlocationtime_"+str(position.device_id)] = lastupdatetime
