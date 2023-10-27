@@ -7,6 +7,8 @@ CONF_MAX_ACCURACY = "max_accuracy"
 CONF_SKIP_ACCURACY_ON = "skip_accuracy_filter_on"
 CONF_SENSORS = "sensors"
 CONF_ATTR_SHOW = "attr_show"
+CONF_MAP_GCJ_LAT = "map_gcj_lat"
+CONF_MAP_GCJ_LNG = "map_gcj_lng"
 
 DEVICE_TRACKERS = "devices"
 SENSORS = "sensors"

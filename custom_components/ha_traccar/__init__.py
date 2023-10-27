@@ -176,7 +176,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             if not varstinydict.get("lastupdate_"+str(position.device_id)):                
                 varstinydict["lastupdate_"+str(position.device_id)]=""                
             if not varstinydict.get("lasttotaldistance_"+str(position.device_id)):
-                varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0,0,0]
+                varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0]
             if not varstinydict.get("lastlocationtime_"+str(position.device_id)):
                 varstinydict["lastlocationtime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not varstinydict.get("updatetime_"+str(position.device_id)):
@@ -184,11 +184,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             if not varstinydict.get("runorstop_"+str(position.device_id)):
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
                 
-            #计算两次总里程的历史变化值，如果相邻三次有两次没变则是保持静止，忽略掉gps信号偶然漂移,一次位移大于10000米的回到00点
+            #计算两次总里程的历史变化值，忽略掉gps信号偶然漂移到超远距离,一次位移大于10000米的回到00点
             thisdistance = varstinydict["lasttotaldistance_"+str(position.device_id)][0] - varstinydict["lasttotaldistance_"+str(position.device_id)][1]
-            lastdistance = varstinydict["lasttotaldistance_"+str(position.device_id)][1] - varstinydict["lasttotaldistance_"+str(position.device_id)][2]
-            lastdistance2 = varstinydict["lasttotaldistance_"+str(position.device_id)][2] - varstinydict["lasttotaldistance_"+str(position.device_id)][3]
-            if thisdistance > 0 and lastdistance > 0 and lastdistance2 > 0 and thisdistance < 10000:
+            if thisdistance < 10000:
                 pass
             else:
                 thisdistance = 0
@@ -198,8 +196,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             lastupdate = device.last_update
             if lastupdate != varstinydict["lastupdate_"+str(position.device_id)] or datetime.datetime.now() - datetime.datetime.strptime(varstinydict["updatetime_"+str(position.device_id)], "%Y-%m-%d %H:%M:%S") > datetime.timedelta(seconds=120):
                 varstinydict["lastupdate_"+str(position.device_id)] = lastupdate            
-                varstinydict["lasttotaldistance_"+str(position.device_id)][3] = varstinydict["lasttotaldistance_"+str(position.device_id)][2]
-                varstinydict["lasttotaldistance_"+str(position.device_id)][2] = varstinydict["lasttotaldistance_"+str(position.device_id)][1]
                 varstinydict["lasttotaldistance_"+str(position.device_id)][1] = varstinydict["lasttotaldistance_"+str(position.device_id)][0]
                 varstinydict["lasttotaldistance_"+str(position.device_id)][0] = thistotaldistance
                 varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")           

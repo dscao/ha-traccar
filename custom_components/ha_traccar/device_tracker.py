@@ -14,6 +14,8 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .helper import gcj02towgs84, wgs84togcj02
+
 from .const import (
     DOMAIN,
     TRACKER_UPDATE,
@@ -27,7 +29,9 @@ from .const import (
     ATTR_SPEED,
     CONF_ATTR_SHOW,
     ATTR_VERSION_HW,
-    ATTR_VERSION_FW
+    ATTR_VERSION_FW,
+    CONF_MAP_GCJ_LAT,
+    CONF_MAP_GCJ_LNG,
 )
 
 from . import TraccarEntity
@@ -97,7 +101,10 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
             position.attributes["parkingtime"] = calculatedata["parkingtime"]
             position.attributes["runorstop"] = calculatedata["runorstop"]
             position.attributes["laststoptime"] = calculatedata["laststoptime"]
-            position.attributes["querytime"] = calculatedata["querytime"]            
+            position.attributes["querytime"] = calculatedata["querytime"]
+            gcjdata = wgs84togcj02(position.longitude, position.latitude)
+            position.attributes[CONF_MAP_GCJ_LAT] = gcjdata[1]
+            position.attributes[CONF_MAP_GCJ_LNG] = gcjdata[0]
             
             self._attributes.update(position.attributes)
         else:
