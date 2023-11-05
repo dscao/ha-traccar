@@ -4,6 +4,8 @@ import logging
 import pytz
 import os
 import json
+import requests
+import re
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -24,6 +26,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dis
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util.json import save_json, load_json
+from .helper import gcj02towgs84, wgs84togcj02, gcj02_to_bd09
 
 from pytraccar import (
     ApiClient,
@@ -52,7 +55,7 @@ class TraccarEntity(RestoreEntity):
         self._unsub_dispatcher = None
         self._device_info_id = f"{server}-{device.unique_id}"
         self._server = server
-        self._device_unique_id = device.unique_id        
+        self._device_unique_id = device.unique_id      
 
     @property
     def device_info(self):
@@ -97,7 +100,7 @@ async def async_setup(hass: HomeAssistant, hass_config: ConfigType) -> bool:
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     config = config_entry.data
     
-    attr_show = config_entry.data.get(CONF_ATTR_SHOW, True)
+    attr_show = config_entry.data.get(CONF_ATTR_SHOW, True)    
 
     api = ApiClient(
         host=config[CONF_HOST],
@@ -117,8 +120,25 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         _LOGGER.error("Connection with Traccar failed - %s", exception)
         return False
 
-    server = f"{config[CONF_HOST]}-{config[CONF_PORT]}"
+    server = f"{config[CONF_HOST]}-{config[CONF_PORT]}"    
+    
+    def save_to_file(filename, data):
+        with open(filename, 'w') as f:
+            json.dump(data, f)
 
+    def read_from_file(filename):
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        return data
+        
+    path = hass.config.path(f'.storage')
+    global varstinydict
+    _LOGGER.debug("varstinydict: %s", varstinydict)
+    if not os.path.exists(f'{path}/ha_traccar.json'):
+        save_to_file(f'{path}/ha_traccar.json', {})            
+    varstinydict = read_from_file(f'{path}/ha_traccar.json')
+    _LOGGER.debug("read_from_file varstinydict: %s", varstinydict)
+        
     async def _async_update(now=None):
         """Update info from Traccar."""
         _LOGGER.debug("Updating device data")
@@ -133,6 +153,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             
         #_LOGGER.debug(devices)    
         #_LOGGER.debug(positions)
+        global varstinydict
+        _LOGGER.debug("update varstinydict: %s", varstinydict)
 
         for position in positions:
             device = next(
@@ -142,22 +164,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             if not device:
                 continue
                 
-            _LOGGER.debug(position)
-            def save_to_file(filename, data):
-                with open(filename, 'w') as f:
-                    json.dump(data, f)
-
-            def read_from_file(filename):
-                with open(filename, 'r') as f:
-                    data = json.load(f)
-                return data
-                
-            path = hass.config.path(f'.storage')
-            global varstinydict
-            if not os.path.exists(f'{path}/ha_traccar.json'):
-                save_to_file(f'{path}/ha_traccar.json', {})
-                
-            varstinydict = read_from_file(f'{path}/ha_traccar.json')
+            _LOGGER.debug(position)            
             
             def time_diff (timestamp):
                 result = datetime.datetime.now() - datetime.datetime.fromtimestamp(timestamp)
@@ -171,9 +178,28 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 elif minutes > 0:
                     return("{0}分钟{1}秒".format(minutes,seconds))
                 else:
-                    return("{0}秒".format(seconds))    
+                    return("{0}秒".format(seconds))
+
+            
                     
-            if not varstinydict.get("lastupdate_"+str(position.device_id)):                
+            def get_free_geocoding(lat, lng):
+                def get_data(url):
+                    json_text = requests.get(url).content
+                    json_text = json_text.decode('utf-8')
+                    # json_text = re.sub(r'\\','',json_text)
+                    # json_text = re.sub(r'"{','{',json_text)
+                    # json_text = re.sub(r'}"','}',json_text)
+                    resdata = json.loads(json_text)
+                    return resdata
+                api_url = 'https://api.map.baidu.com/geocoder'
+                location = str("{:.6f}".format(lat))+','+str("{:.6f}".format(lng))
+                url = api_url+'?&output=json&location='+location
+                _LOGGER.debug(url)
+                response = get_data(url)
+                _LOGGER.debug(response)
+                return response                    
+                    
+            if not varstinydict.get("lastupdate_"+str(position.device_id)):
                 varstinydict["lastupdate_"+str(position.device_id)]=""                
             if not varstinydict.get("lasttotaldistance_"+str(position.device_id)):
                 varstinydict["lasttotaldistance_"+str(position.device_id)]=[0,0]
@@ -183,7 +209,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 varstinydict["updatetime_"+str(position.device_id)] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if not varstinydict.get("runorstop_"+str(position.device_id)):
                 varstinydict["runorstop_"+str(position.device_id)] = "stop"
-                
+            if not varstinydict.get("coords_"+str(position.device_id)):
+                _LOGGER.debug("初始化lastupdate_"+str(position.device_id))
+                varstinydict["coords_"+str(position.device_id)] = [0,0]
+            _LOGGER.debug(varstinydict["lastlocationtime_"+str(position.device_id)])
+            _LOGGER.debug(varstinydict["lasttotaldistance_"+str(position.device_id)])            
             #计算两次总里程的历史变化值，忽略掉gps信号偶然漂移到超远距离,一次位移大于10000米的回到00点
             thisdistance = varstinydict["lasttotaldistance_"+str(position.device_id)][0] - varstinydict["lasttotaldistance_"+str(position.device_id)][1]
             if thisdistance < 10000:
@@ -238,6 +268,20 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             calculatedata["runorstop"] = varstinydict["runorstop_"+str(position.device_id)]
             calculatedata["parkingtime"] = parkingtime
             calculatedata["querytime"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            if varstinydict["coords_"+str(position.device_id)] != [position.latitude, position.longitude]:
+                _LOGGER.debug("free_geocoding")
+                _LOGGER.debug(varstinydict["coords_"+str(position.device_id)])
+                _LOGGER.debug([position.latitude, position.longitude])
+                gcjdata = wgs84togcj02(position.longitude, position.latitude)
+                bddata = gcj02_to_bd09(gcjdata[0], gcjdata[1])
+                addressdata = await hass.async_add_executor_job(get_free_geocoding, bddata[1], bddata[0])
+                if addressdata['status'] == 'OK':
+                    varstinydict["address_"+str(position.device_id)] = addressdata['result']['formatted_address']
+                else:
+                    varstinydict["address_"+str(position.device_id)] = 'free接口返回错误'
+                varstinydict["coords_"+str(position.device_id)] = [position.latitude, position.longitude]
+            calculatedata["get_address"] = varstinydict["address_"+str(position.device_id)]
             
             #_LOGGER.debug("laststoptime: %s, querytime %s", lastlocationtime, calculatedata["querytime"])
 

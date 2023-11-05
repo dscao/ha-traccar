@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import time, datetime
-
 from homeassistant.components.device_tracker import (
     SourceType,
     TrackerEntity,
@@ -14,7 +13,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .helper import gcj02towgs84, wgs84togcj02
+from .helper import gcj02towgs84, wgs84togcj02, gcj02_to_bd09
 
 from .const import (
     DOMAIN,
@@ -32,6 +31,8 @@ from .const import (
     ATTR_VERSION_FW,
     CONF_MAP_GCJ_LAT,
     CONF_MAP_GCJ_LNG,
+    CONF_MAP_BD_LAT,
+    CONF_MAP_BD_LNG, 
 )
 
 from . import TraccarEntity
@@ -99,17 +100,22 @@ class TraccarDeviceTrackerEntity(TrackerEntity, TraccarEntity):
                 position.attributes["address"] = "unknown"                
 
             position.attributes["parkingtime"] = calculatedata["parkingtime"]
+            position.attributes["get_address"] = calculatedata["get_address"]
             position.attributes["runorstop"] = calculatedata["runorstop"]
             position.attributes["laststoptime"] = calculatedata["laststoptime"]
             position.attributes["querytime"] = calculatedata["querytime"]
             gcjdata = wgs84togcj02(position.longitude, position.latitude)
             position.attributes[CONF_MAP_GCJ_LAT] = gcjdata[1]
             position.attributes[CONF_MAP_GCJ_LNG] = gcjdata[0]
+            bddata = gcj02_to_bd09(position.attributes[CONF_MAP_GCJ_LNG], position.attributes[CONF_MAP_GCJ_LAT])
+            position.attributes[CONF_MAP_BD_LAT] = bddata[1]
+            position.attributes[CONF_MAP_BD_LNG] = bddata[0]
             
             self._attributes.update(position.attributes)
         else:
             self._attributes={}
-
+ 
+        
     # @property
     # def battery_level(self):
         # """Return battery value of the device."""

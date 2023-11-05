@@ -122,6 +122,9 @@
 					"address": {
 						"name": "address"
 					},
+                    "get_address": {
+						"name": "get address"
+					},
 					"querytime": {
 						"name": "query time"
 					},

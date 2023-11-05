@@ -96,6 +96,12 @@
 					"map_gcj_lng": {
 					  "name": "高德地图经度"
 					},
+                    "map_bd_lat": {
+					  "name": "百度地图纬度"
+					},
+					"map_bd_lng": {
+					  "name": "百度地图经度"
+					},
 					"motion": {
 						"name": "移动"
 					},
@@ -128,6 +134,9 @@
 					},
 					"address": {
 						"name": "地址"
+					},
+                    "get_address": {
+						"name": "api转换的地址"
 					},
 					"querytime": {
 						"name": "查询时间"
