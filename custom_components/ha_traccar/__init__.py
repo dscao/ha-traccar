@@ -25,7 +25,8 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.helpers.restore_state import RestoreEntity
-from homeassistant.util.json import save_json, load_json
+from homeassistant.util.json import load_json
+from homeassistant.helpers.json import save_json
 from .helper import gcj02towgs84, wgs84togcj02, gcj02_to_bd09
 
 from pytraccar import (
